@@ -73,7 +73,7 @@ Short options also exist for flags
 pacrd-migrate -i /input/path -o /output/path
 ```
 
-[PaCRD manifests]: TODO
-[Dinghy]: TODO
-[release page]: TODO
-[`stack`]: TODO
+[PaCRD manifests]: https://docs.armory.io/docs/spinnaker-user-guides/pacrd/
+[Dinghy]: https://docs.armory.io/docs/armory-admin/dinghy-enable/
+[releases page]: https://github.com/armory/pacrd-migrate/releases
+[`stack`]: https://docs.haskellstack.org/en/stable/README/
