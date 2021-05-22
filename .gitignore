@@ -80,3 +80,4 @@ tags
 # End of https://www.toptal.com/developers/gitignore/api/linux,git,haskell,vim
 *.cabal
 stack.yaml.lock
+stan.html
