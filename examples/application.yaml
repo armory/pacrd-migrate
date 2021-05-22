@@ -1,0 +1,6 @@
+apiVersion: pacrd.armory.io/v1alpha1
+kind: Application
+metadata:
+  name: app
+spec:
+  email: fernando.freire@armory.io

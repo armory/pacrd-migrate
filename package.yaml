@@ -14,6 +14,9 @@ extra-source-files:
 dependencies:
   - base >= 4.7 && < 5
   - text
+  - yaml
+  - aeson
+  - directory
 
 ghc-options:
   - -Wall
@@ -27,6 +30,8 @@ ghc-options:
   - -fwarn-unused-imports
   - -fwarn-missing-signatures
   - -fwarn-incomplete-patterns
+  - -fwrite-ide-info
+  - -hiedir=.hie
 
 default-extensions:
   - BangPatterns

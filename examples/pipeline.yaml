@@ -1,0 +1,18 @@
+apiVersion: pacrd.armory.io/v1alpha1
+kind: Pipeline
+metadata:
+  name: lol
+spec:
+  application: foo
+  expectedArtifacts:
+    - id: &id pacrd-image
+      displayName: &name Public PaCRD Image
+      matchArtifact:
+        type: docker/image
+        properties:
+          name: armory/pacrd
+          artifactAccount: docker-registry
+  stages:
+    - type: wait
+      properties:
+        duration: foo
