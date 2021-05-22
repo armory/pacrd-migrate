@@ -12,7 +12,8 @@ Stability : experimental
 module Pacrd where
 
 import Data.Text    (Text)
-import Data.Yaml    (FromJSON, Value (String), parseJSON, withObject, (.:))
+import Data.Yaml    (FromJSON, Value (String), parseJSON, withObject, (.:),
+                     (.:?))
 import GHC.Generics (Generic)
 
 -- | Represents a PaCRD Application manifest.
@@ -20,19 +21,23 @@ data Application = Application {
     apiVersion :: !Text,
     kind       :: !Kind,
     metadata   :: !Metadata,
-    spec       :: !ApplicationSpec
+    appSpec    :: !ApplicationSpec
   } deriving (Show, Generic)
 
-instance FromJSON Application
+instance FromJSON Application where
+  parseJSON = withObject "Application" $ \o ->
+    Application <$> o .: "apiVersion" <*> o .: "kind" <*> o .: "metadata" <*> o .: "spec"
 
 data ApplicationSpec = ApplicationSpec {
-    email       :: !(Maybe Text),
-    description :: !(Maybe Text),
-    dataSources :: !(Maybe DataSources),
-    permissions :: !(Maybe Permissions)
+    email          :: !(Maybe Text),
+    appDescription :: !(Maybe Text),
+    dataSources    :: !(Maybe DataSources),
+    permissions    :: !(Maybe Permissions)
   } deriving (Show, Generic)
 
-instance FromJSON ApplicationSpec
+instance FromJSON ApplicationSpec where
+  parseJSON = withObject "ApplicationSpec" $ \o ->
+    ApplicationSpec <$> o .:? "email" <*> o.:? "description" <*> o.:? "dataSources" <*> o.:? "permissions"
 
 data Permissions = Permissions {
     read    :: !(Maybe [Text]),
@@ -43,9 +48,9 @@ data Permissions = Permissions {
 instance FromJSON Permissions where
   parseJSON = withObject "Permissions" $ \v ->
     Permissions
-    <$> v .: "READ"
-    <*> v .: "WRITE"
-    <*> v .: "EXECUTE"
+    <$> v .:? "READ"
+    <*> v .:? "WRITE"
+    <*> v .:? "EXECUTE"
 
 data DataSources = DataSources {
     enabled  :: !(Maybe [DataSource]),
