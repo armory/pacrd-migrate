@@ -1,4 +1,11 @@
 apiVersion: pacrd.armory.io/v1alpha1
+kind: Application
+metadata:
+  name: app
+spec:
+  email: fernando.freire@armory.io
+---
+apiVersion: pacrd.armory.io/v1alpha1
 kind: Pipeline
 metadata:
   name: lol
@@ -13,10 +20,6 @@ spec:
         properties:
           name: armory/pacrd
           artifactAccount: docker-registry
-  triggers:
-    - type: webhook
-      properties:
-        foo: bar
   stages:
     - type: wait
       properties:

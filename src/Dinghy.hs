@@ -1,18 +1,22 @@
 {-|
-Module : Dinghy
+Module      : Dinghy
 Description : Types and operations in the Dinghy domain.
-Copyright : (c) Armory.io 2021
-License : BSD3
-Maintainer : Fernando Freire
-Stability : experimental
+Copyright   : (c) Armory.io 2021
+License     : BSD3
+Maintainer  : Fernando Freire
+Stability   : experimental
 -}
+
+{-# LANGUAGE DuplicateRecordFields #-}
 
 module Dinghy where
 
-import Data.Aeson   (ToJSON (toEncoding), Value (String), defaultOptions,
-                     genericToEncoding, object, omitNothingFields, toJSON, (.=))
-import Data.Text    (Text)
-import GHC.Generics (Generic)
+import Data.Aeson         (ToJSON (toEncoding), Value, defaultOptions,
+                           fieldLabelModifier, genericToEncoding,
+                           omitNothingFields)
+import Data.Text          (Text)
+import Dinghy.Application
+import GHC.Generics       (Generic)
 
 -- | Subset of the Dinghyfile spec.
 --
@@ -31,49 +35,34 @@ instance ToJSON Dinghyfile where
 -- | Subset of a Pipeline representation in Dinghy.
 --
 -- TODO
-data Pipeline = Pipeline deriving (Show, Generic)
-
-instance ToJSON Pipeline
-
--- | Subset of an Application representation in Dinghy.
-data Application = Application {
-    email       :: !(Maybe Text),
-    description :: !(Maybe Text),
-    dataSources :: !(Maybe DataSources),
-    permissions :: !(Maybe Permissions)
+data Pipeline = Pipeline {
+    pId                  :: !(Maybe Text),
+    pType                :: !(Maybe Text),
+    name                 :: !Text,
+    pApplication         :: !Text,
+    description          :: !(Maybe Text),
+    executionEngine      :: !(Maybe Text),
+    parallel             :: !(Maybe Bool),
+    limitConcurrent      :: !(Maybe Bool),
+    keepWaitingPipelines :: !(Maybe Bool),
+    stages               :: ![Value],
+    triggers             :: !(Maybe [Value]),
+    parameters           :: !(Maybe [Value]),
+    notifications        :: !(Maybe [Value]),
+    expectedArtifacts    :: !(Maybe [Value]),
+    locked               :: !(Maybe Locked),
+    spelEvaluator        :: !(Maybe Text)
   } deriving (Show, Generic)
 
-instance ToJSON Application where
-  toEncoding = genericToEncoding $ defaultOptions { omitNothingFields = True }
+instance ToJSON Pipeline where
+  toEncoding = genericToEncoding $ defaultOptions {
+                 fieldLabelModifier = \case { "pId" -> "id"; "pType" -> "type"; "pApplication" -> "application"; s -> s },
+                 omitNothingFields = True
+               }
 
-data DataSources = DataSources {
-    enabled  :: !(Maybe [DataSource]),
-    disabled :: !(Maybe [DataSource])
+data Locked = Locked {
+    ui            :: Bool,
+    allowUnlockUi :: Bool
   } deriving (Show, Generic)
 
-instance ToJSON DataSources where
-  toEncoding = genericToEncoding $ defaultOptions { omitNothingFields = True }
-
-data DataSource =
-  ServerGroup | Execution | LoadBalancer | SecurityGroup
-  deriving (Show)
-
-instance ToJSON DataSource where
-  toJSON ServerGroup   = String "serverGroups"
-  toJSON LoadBalancer  = String "executions"
-  toJSON Execution     = String "loadBalancer"
-  toJSON SecurityGroup = String "securityGroups"
-
-data Permissions = Permissions {
-    read    :: !(Maybe [Text]),
-    write   :: !(Maybe [Text]),
-    execute :: !(Maybe [Text])
-  } deriving (Show)
-
-instance ToJSON Permissions where
-  toJSON (Permissions read write execute) = object [
-      "READ"    .= toJSON read,
-      "WRITE"   .= toJSON write,
-      "EXECUTE" .= toJSON execute
-    ]
-
+instance ToJSON Locked

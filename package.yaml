@@ -17,6 +17,8 @@ dependencies:
   - yaml
   - aeson
   - directory
+  - unordered-containers
+  - hashable
 
 ghc-options:
   - -Wall
