@@ -11,12 +11,17 @@ Stability   : experimental
 
 module Dinghy where
 
+import qualified Data.Text as T
+import qualified Data.Aeson.Encode.Pretty as Json
 import Data.Aeson         (ToJSON (toEncoding), Value, defaultOptions,
                            fieldLabelModifier, genericToEncoding,
                            omitNothingFields)
 import Data.Text          (Text)
 import Dinghy.Application
 import GHC.Generics       (Generic)
+import qualified System.Directory as Dir
+import System.FilePath.Posix ((</>))
+import qualified Data.ByteString.Lazy as BS
 
 -- | Subset of the Dinghyfile spec.
 --
@@ -31,6 +36,15 @@ data Dinghyfile = Dinghyfile {
 
 instance ToJSON Dinghyfile where
   toEncoding = genericToEncoding $ defaultOptions { omitNothingFields = True }
+
+writeDinghyfile :: Text -> Dinghyfile -> IO ()
+writeDinghyfile outputPath dinghyfile = do
+  _ <- Dir.createDirectory dir
+  BS.writeFile fname $ Json.encodePretty dinghyfile
+    where
+      name = T.unpack $ application dinghyfile
+      dir = (T.unpack outputPath) </> name
+      fname = dir </> "Dinghyfile"
 
 -- | Subset of a Pipeline representation in Dinghy.
 --

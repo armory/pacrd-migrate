@@ -13,13 +13,16 @@ extra-source-files:
 
 dependencies:
   - base >= 4.7 && < 5
-  - text
-  - yaml
   - aeson
+  - aeson-pretty
+  - bytestring
   - directory
-  - unordered-containers
+  - filepath
   - hashable
   - optparse-applicative
+  - text
+  - unordered-containers
+  - yaml
 
 ghc-options:
   - -Wall
