@@ -1,6 +1,11 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Main where
 
+import           Cli              (Command (..), inputPath, outputPath)
+import qualified Cli
 import           Control.Monad    (join)
+import qualified Data.Text        as T
 import qualified Migrate
 import           Pacrd
 import qualified System.Directory as Dir
@@ -8,9 +13,10 @@ import           Wrapper
 
 main :: IO ()
 main = do
-    -- TODO support input paths
-    files     <- filter isYamlFile <$> Dir.listDirectory "."
+    Command { inputPath, outputPath } <- Cli.parseCli
+    files <- filter isYamlFile <$> Dir.listDirectory (T.unpack inputPath)
     manifests <- join <$> mapM readManifest files
     let (apps, pipes) = splitWrapper manifests
     print . Migrate.convertPacrdTree $ pacrdTree apps pipes
-    -- TODO support output paths
+    -- TODO
+    putStrLn $ "Writing Dinghyfile to ... '" <> T.unpack outputPath <> "'"
