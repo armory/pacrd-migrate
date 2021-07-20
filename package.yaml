@@ -61,7 +61,24 @@ default-extensions:
   - ScopedTypeVariables
   - TemplateHaskell
 
+flags:
+  static:
+    description: Build a static binary.
+    manual: true
+    default: false
+
 executables:
   pacrd-migrate:
     source-dirs:      src
     main:             Main.hs
+    when:
+      - condition: flag(static)
+        ghc-options:
+          - -threaded
+          - -static
+          - -O2
+          - -optl-static
+          - -optl-pthread
+          - -fPIC
+        cc-options: -static
+        ld-options: -static -pthread
