@@ -1,0 +1,91 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+      - run: |
+          echo "${{ steps.create-release.outputs.upload_url }}" > release_url.txt
+      - uses: actions/upload-artifact@v2.2.4
+        with:
+          name: release_url
+          path: release_url.txt
+
+  compile-linux-binary:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-haskell@v1.1.4
+        with:
+          enable-stack: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.stack
+          key: ${{ runner.os }}-${{ hashFiles('stack.yaml.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - name: Compile Linux Binary
+        # Use ghc-musl to build a static binary against musl instead of glibc
+        # NOTE: ghc883 needs to be changed to the GHC used in each Stack LTS
+        run: |
+          stack --docker --docker-image utdemir/ghc-musl:v19-ghc8104 build --split-objs --flag pacrd-migrate:static --copy-bins
+      - uses: actions/download-artifact@v2
+        with:
+          name: release_url
+      - id: get_release_info
+        run: |
+          echo "::set-output name=upload_url::$(cat release_url/release_url.txt)"
+      - name: Upload Linux binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./.stack-work/docker/_home/.local/bin/pacrd-migrate
+          asset_name: pacrd-migrate-linux-amd64
+          asset_content_type: application/octet-stream
+
+  compile-macOS-binary:
+    needs: create-release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-haskell@v1.1.4
+        with:
+          enable-stack: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.stack
+          key: ${{ runner.os }}-${{ hashFiles('stack.yaml.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - name: Compile macOS binary
+        run: |
+          stack --system-ghc build --copy-bins
+      - uses: actions/download-artifact@v2
+        with:
+          name: release_url
+      - id: get_release_info
+        run: |
+          echo "::set-output name=upload_url::$(cat release_url/release_url.txt)"
+      - name: Upload Linux binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ~/.local/bin/pacrd-migrate
+          asset_name: pacrd-migrate-macOS-amd64
+          asset_content_type: application/octet-stream
