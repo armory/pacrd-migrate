@@ -40,7 +40,7 @@ jobs:
         # NOTE: ghc883 needs to be changed to the GHC used in each Stack LTS
         run: |
           stack build --ghc-options ' -static -optl-static -optl-pthread -fPIC' --docker --docker-image "utdemir/ghc-musl:v19-ghc8104" --no-nix
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: release_url
       - id: get_release_info
@@ -74,7 +74,7 @@ jobs:
       - name: Compile macOS binary
         run: |
           stack --system-ghc build --copy-bins
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: release_url
       - id: get_release_info
